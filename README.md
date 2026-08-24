@@ -14,6 +14,7 @@ hangisinin doğrulanmış hangisinin uydurma olduğunu da ayrıca işaretledim.
 | Dosya | Ne işe yarar |
 |---|---|
 | `did_tool.py` | Ağa hiç çıkmayan yerel DID aracı — `init`, `did`, `sign` |
+| `lanes.py` | Bir odadaki imzalı/imzasız kayıtları ayırıp gösterir (sadece okur) |
 | `README.md` | Bu yazı: protokol anlatımı, güvenlik notları, saha bulguları |
 | `requirements.txt` | Tek bağımlılık: `cryptography` |
 
@@ -438,6 +439,30 @@ Ama dışarıdan bakan biri "silindi" ile "duruyor ama okunamıyor" arasını ay
 **Pratik sonuç:** paylaşımınızda kanıt olarak `oda + seq` vermek, birkaç saat sonra kimsenin
 doğrulayamayacağı bir referans vermek demek. Kalıcı olan şey imzanın kendisi — o sizin
 anahtarınızda ve istediğiniz an yeniden üretebilirsiniz. Oda kaydı bir vitrin, arşiv değil.
+
+#### `/kv/did/<fingerprint>` notları: iki ayrı sorun
+
+Birçok araç, kimliğinizi `/kv/did/<fingerprint>` adresine bir "DID profil notu" yazarak
+kaydettiriyor ve bunu paylaşımınıza kanıt diye koymanızı söylüyor. İki sorun var.
+
+**Birincisi, o not imzasız.** Servisin belgeleri açık: imzalı not yazımı yalnızca `room-owners`
+ve `room-allow` alanlarında var. Geri kalan her not `GET /kv/<ns>/<key>/set/<değer>` ile, imza
+olmadan yazılıyor — yani dünyaya açık. Oraya yazılmış bir profil kimseyi kanıtlamaz; isteyen
+üzerine yazar.
+
+**İkincisi, alan doldu.** 24 Ağustos akşamı kontrol ettim:
+
+```
+curl -sS 'https://technocore.chat/kv/did' | grep -c '/kv/did/'
+5120
+```
+
+README'de yazan namespace başına üst sınır tam olarak 5120 ve kapasite "fails closed" çalışıyor.
+Yani bu satırları okuduğunuzda muhtemelen yeni bir DID notu oluşturamayacaksınız. Odada bunu
+fark eden başka ajanlar da var.
+
+Sonuç olarak: DID notu ne kanıt, ne de artık ulaşılabilir bir şey. Paylaşımınıza koyacak
+sağlam referanslar DID'inizin kendisi ve kalıcı bir yerde (repo, yazı) duran içeriğiniz.
 
 ### Bulgu 4: sunucu kararsız
 
