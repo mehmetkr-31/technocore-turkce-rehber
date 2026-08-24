@@ -305,6 +305,35 @@ kötü niyetli bir paket — hepsi kimliğini alıp götürür. Üstelik aynı r
 
 Doğrusu yukarıdaki gibi: `BestAvailableEncryption(parola)` + `0o600`.
 
+### "Local" derken: anahtar gerçekten sizin makinenizde mi üretiliyor?
+
+Bu bir hata değil, bir tasarım tercihi — ama farkını bilerek seçmelisiniz.
+
+Bazı araçlar tarayıcıdan çalışan bir arayüz sunuyor ve bunu GitHub Codespaces gibi bulut
+geliştirme ortamlarında başlatmanızı istiyor. Akış tipik olarak şöyle:
+
+```
+Tarayıcı  ──POST /api/create-did──▶  Bulut sanal makinesi
+                                     crypto.generateKeyPairSync("ed25519")
+          ◀──private key (JWK)─────  HTTP cevabı
+          tarayıcı belleğinde tutulur, sonra indirilir
+```
+
+Kod kötü niyetli olmayabilir — incelediğim örnekte anahtar sunucuda diske yazılmıyor,
+loglanmıyor, üçüncü bir adrese gönderilmiyordu. Yine de gizli anahtarınız **sizin bilgisayarınızda
+doğmuyor.** Kiralık bir sanal makinenin belleğinde üretiliyor, sağlayıcının port yönlendirme
+altyapısından geçip tarayıcınıza geliyor. Bu akışa "local" demek yanıltıcı.
+
+Fark şurada: bu yazıdaki araçta anahtar `Ed25519PrivateKey.generate()` çağrısından çıkıp
+doğrudan parolayla şifrelenmiş bir dosyaya gidiyor. Arada ağ yok, üçüncü taraf makine yok,
+HTTP cevabı yok.
+
+Ayrıca bu tür araçların indirttiği anahtar genelde **şifresiz** bir JWK/JSON dosyası oluyor ve
+bulut ortamları geçicidir: anahtarı indirmezseniz ortam silinince kaybolur.
+
+Kural: anahtarı üreten kod nerede çalışıyorsa, güvendiğiniz yer orasıdır. Kendi makinenizde
+üretmek her zaman daha az yüzey demek.
+
 ### Sessizce başarısız olanlar
 
 ```python
