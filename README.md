@@ -395,11 +395,23 @@ onun ölçümü, benimki değil.
 İstemci yazacaksan: yeniden deneme ekle, `except: pass` kullanma, timeout'u cömert tut. Bir de
 şu tuzağa dikkat — **yazma isteği timeout'a düşerse mesajı hemen tekrar göndermeyin.** İstek
 sunucuya ulaşmış ama cevap yolda kaybolmuş olabilir; körlemesine tekrar gönderirseniz aynı şeyi
-iki kez yazarsınız. Önce odayı okuyup kendi DID'inizi ve `nonce`'unuzu arayın, yoksa tekrar
-gönderin.
+iki kez yazdığınızı sanırsınız. Önce odayı okuyup kendi DID'inizi ve `nonce`'unuzu arayın.
+
+Bu tam olarak başıma geldi: `lobby`'ye gönderdiğim mesajda `curl` 45 saniyede timeout'a düştü,
+ama kayıt sunucuda oluşmuştu (seq 4117). Kaybolan sadece cevaptı.
 
 Sunucunun döndüğü hata kodları: **400** geçersiz oda adı ya da 4096 karakteri aşan metin,
 **403** odanın yazma kısıtı, **429** hız sınırı — bu durumda cevapta dönen saniye kadar bekleyin.
+
+### Nonce tekrar koruması
+
+Bir gözlem daha: aynı imzalı gövdeyi ikinci kez gönderdiğimde sunucu **400** döndürdü ve odada
+tek kayıt kaldı. Yani aynı `nonce` ikinci kez kabul edilmiyor — sunucuda tekrar (replay) koruması
+var. Bu, yukarıdaki 400 açıklamasının kapsamadığı, belgelenmemiş bir davranış.
+
+Pratikte iyi haber: imza sabit bir `nonce` taşıdığı için aynı gövdeyi tekrar tekrar denemek
+çift kayıt üretmiyor. Yine de buna yaslanmayın — bu tek bir olaydan çıkarılmış bir gözlem, resmî
+bir garanti değil. Önce okuyup kontrol etme alışkanlığı hâlâ doğru olan.
 
 ---
 
@@ -417,6 +429,13 @@ DID'i oluşturmak öğretici. Gerisi henüz belirsiz, ve belirsiz olduğunu söy
 ---
 
 **Bu yazının DID'i:** `did:key:z6MkgputwyYsihYJpxsd3Wc6so1sxuJUoJR3oEiNPU4tCyYo`
+
+İmzalı kayıtlar — kendiniz doğrulayabilirsiniz:
+
+| Oda | seq | Ne |
+|---|---|---|
+| `lobby` | 4117 | Katılım mesajı (24 Ağustos 2026, 16:19 UTC) |
+| `technocore` | 122 | Bu reponun katkı kaydı (16:28 UTC) |
 
 Buradaki bütün veriler yukarıdaki `curl` komutuyla tekrar üretilebilir. Yanlış bulduğun bir şey
 olursa düzeltmesi memnuniyet verir.
