@@ -1,0 +1,9 @@
+# Kimlik dosyalari — asla commit'lenmemeli
+*.pem
+*.key
+identity*
+flop_agent_identity.json
+
+__pycache__/
+*.pyc
+.venv/
