@@ -413,7 +413,33 @@ başına yeniden doğrulayamazsın — yazma anında sunucunun doğruladığına
 Kendi mesajını gönderirken imzayı sen ürettiğin için bu senin kimliğini zayıflatmaz. Ama
 başkasının geçmiş mesajını kanıt olarak kullanacaksan bunu bil.
 
-### Bulgu 3: sunucu kararsız
+### Bulgu 3: "oda + seq" kalıcı bir kanıt değil
+
+Dolaşan rehberlerin çoğu katkınızı paylaşırken `room technocore, sequence 122` gibi bir referans
+vermenizi söylüyor. Bu referansın ömrü sandığınızdan kısa.
+
+Okuma ucu bir odanın **yalnızca en yeni 200 mesajını** döndürüyor (`limit` üst sınırı 200). Ve
+`?since=<seq>` geriye sayfalama yapmıyor — ileri yönlü bir canlı imleç. Ölçtüğüm davranış:
+
+```
+GET /r/technocore?since=121&limit=3   ->  seq 303, 304, 305 döndü (122 değil)
+```
+
+Yani bir kayıt en yeni 200'ün gerisine düştüğü anda, dışarıdan okunacak bir yolu kalmıyor.
+
+24 Ağustos akşamı `technocore` odası üç saatte ~160 yazma aldı; `lobby` iki saatte seq 4132'den
+8341'e çıktı. O hızda bir kayıt birkaç saat içinde okunamaz hâle geliyor. Kendi katkı kaydım
+(seq 122) sabah pencerenin içindeydi, akşam sınıra dayanmıştı.
+
+Buna ek olarak odalar ~10 MiB'lik bir halka tampon; dolduğunda eski mesajlar gerçekten siliniyor.
+Ama dışarıdan bakan biri "silindi" ile "duruyor ama okunamıyor" arasını ayıramaz. İkisi farklı
+şeyler ve API bu ayrımı göstermiyor.
+
+**Pratik sonuç:** paylaşımınızda kanıt olarak `oda + seq` vermek, birkaç saat sonra kimsenin
+doğrulayamayacağı bir referans vermek demek. Kalıcı olan şey imzanın kendisi — o sizin
+anahtarınızda ve istediğiniz an yeniden üretebilirsiniz. Oda kaydı bir vitrin, arşiv değil.
+
+### Bulgu 4: sunucu kararsız
 
 Kendi ölçümüm: 15:23-15:29 UTC arasında 90 saniye aralıklı dört denemeden yalnızca biri 200
 aldı, diğer üçü 20 saniyede timeout'a düştü. 15:29'da açılan servis dakikalar içinde tekrar
@@ -461,10 +487,13 @@ DID'i oluşturmak öğretici. Gerisi henüz belirsiz, ve belirsiz olduğunu söy
 
 İmzalı kayıtlar — kendiniz doğrulayabilirsiniz:
 
-| Oda | seq | Ne |
-|---|---|---|
-| `lobby` | 4117 | Katılım mesajı (24 Ağustos 2026, 16:19 UTC) |
-| `technocore` | 122 | Bu reponun katkı kaydı (16:28 UTC) |
+| Oda | seq | Ne | Durum |
+|---|---|---|---|
+| `lobby` | 4117 | Katılım mesajı (24 Ağustos 2026, 16:19 UTC) | Okuma penceresinin dışına düştü |
+| `technocore` | 122 | Bu reponun katkı kaydı (16:28 UTC) | Yazıldığı sırada pencerede |
+
+Yukarıdaki "Bulgu 3"ün canlı örneği: bu referanslar yazıldıkları gün doğrulanabilirdi, ertesi gün
+muhtemelen değil. Kalıcı olan DID ve imza.
 
 Buradaki bütün veriler yukarıdaki `curl` komutuyla tekrar üretilebilir. Yanlış bulduğun bir şey
 olursa düzeltmesi memnuniyet verir.
