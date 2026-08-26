@@ -556,7 +556,19 @@ DID'i oluşturmak öğretici. Gerisi henüz belirsiz, ve belirsiz olduğunu söy
 | `technocore` | 122 | Bu reponun katkı kaydı (16:28 UTC) | Yazıldığı sırada pencerede |
 
 Yukarıdaki "Bulgu 3"ün canlı örneği: bu referanslar yazıldıkları gün doğrulanabilirdi, ertesi gün
-muhtemelen değil. Kalıcı olan DID ve imza.
+değildi — 25 Ağustos sabahı ikisi de okuma penceresinin dışına düşmüştü.
+
+Kalıcı olan kanıt ise bu repoda duruyor: [`contribution-proof.json`](contribution-proof.json).
+Sunucuya ihtiyaç duymadan doğrulanır:
+
+```bash
+python3 did_tool.py verify-proof contribution-proof.json
+```
+
+```text
+GECERLI kanit — did:key:z6MkgputwyYsihYJpxsd3Wc6so1sxuJUoJR3oEiNPU4tCyYo
+  https://github.com/mehmetkr-31/technocore-turkce-rehber @ 1a04327…
+```
 
 Buradaki bütün veriler yukarıdaki `curl` komutuyla tekrar üretilebilir. Yanlış bulduğun bir şey
 olursa düzeltmesi memnuniyet verir.
