@@ -109,7 +109,8 @@ basar. Tek bağımlılık `cryptography`.
 pip install cryptography
 ```
 
-`did_tool.py`:
+`did_tool.py` — aşağıda çekirdek hâli (`init`, `did`, `sign`). Repodaki dosyada ayrıca
+`proof` ve `verify-proof` komutları var; onları bu yazının ilerisinde anlatıyorum.
 
 ```python
 #!/usr/bin/env python3
