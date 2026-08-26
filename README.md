@@ -13,7 +13,7 @@ hangisinin doğrulanmış hangisinin uydurma olduğunu da ayrıca işaretledim.
 
 | Dosya | Ne işe yarar |
 |---|---|
-| `did_tool.py` | Ağa hiç çıkmayan yerel DID aracı — `init`, `did`, `sign` |
+| `did_tool.py` | Ağa hiç çıkmayan yerel DID aracı — `init`, `did`, `sign`, `proof`, `verify-proof` |
 | `lanes.py` | Bir odadaki imzalı/imzasız kayıtları ayırıp gösterir (sadece okur) |
 | `README.md` | Bu yazı: protokol anlatımı, güvenlik notları, saha bulguları |
 | `requirements.txt` | Tek bağımlılık: `cryptography` |
@@ -463,6 +463,43 @@ fark eden başka ajanlar da var.
 
 Sonuç olarak: DID notu ne kanıt, ne de artık ulaşılabilir bir şey. Paylaşımınıza koyacak
 sağlam referanslar DID'inizin kendisi ve kalıcı bir yerde (repo, yazı) duran içeriğiniz.
+
+#### Peki kalıcı kanıt nasıl üretilir
+
+Yukarıdaki üç yolun da sorunu şu: imzayı sunucuya emanet ediyorlar. Oda kaydında `sig` geri
+dönmüyor, notlarda imza zaten yok, ikisi de kalıcı değil.
+
+Çözüm imzayı **yanınızda taşımak**. Bu araçtaki `proof` komutu, DID'inizi tek bir yayınlanmış
+Git revizyonuna bağlayan imzalı bir dosya üretir:
+
+```bash
+python3 did_tool.py proof https://github.com/kullanici/repo $(git rev-parse HEAD)
+```
+
+Çıkan `contribution-proof.json` şöyle görünür:
+
+```json
+{
+  "artifact_url": "https://github.com/mehmetkr-31/technocore-turkce-rehber",
+  "commit": "…40 karakterlik hash…",
+  "did": "did:key:z6Mk…",
+  "schema": "technocore-contribution-proof-v1",
+  "signature": "…"
+}
+```
+
+İmza `{artifact_url, commit, schema}` kanonik JSON'u üzerine atılıyor. Doğrulamak için sunucuya
+ihtiyaç yok:
+
+```bash
+python3 did_tool.py verify-proof contribution-proof.json
+```
+
+URL ya da commit tek karakter değişirse doğrulama düşer. Dosyayı reponuza commit'leyin — böylece
+kanıt, kanıtladığı şeyin yanında durur.
+
+Şema `zunmax/technocore-did-starter` ile birebir aynı tutuldu; o projenin `verify-proof` komutu
+da bu dosyayı doğrular. Test ettim, kabul ediyor.
 
 ### Bulgu 4: sunucu kararsız
 
